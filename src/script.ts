@@ -7,11 +7,12 @@ import GameModel from '../model/GameModel';
 
 const workbook = new Excel.Workbook()
 
-for (let i = 0; i < 24; i++) {
-    const url = `https://cdl-other-services.abe-arsfutura.com/production/v2/content-types/match-detail/bltd79e337aca601012?locale=en-us&options=%7B%22id%22%3A${8750 + i}%7D`
+for (let i = 0; i < 40; i++) {
+    const gameid = 8750 + i
+    const url = `https://cdl-other-services.abe-arsfutura.com/production/v2/content-types/match-detail/bltd79e337aca601012?locale=en-us&options=%7B%22id%22%3A${gameid}%7D`
 
     const data = getData(url).then(data => {
-        if (data.data.matchData.matchExtended.match.status !== 'COMPLETED') {
+        if (data === null || data.data.matchData.matchExtended.match.status !== 'COMPLETED') {
             return;
         }
         const homeTeam = setTeamData(data.data.matchData.matchExtended.homeTeamCard) //get home team
@@ -34,8 +35,12 @@ for (let i = 0; i < 24; i++) {
                 'x-origin': 'callofdutyleague.com',
             }
         })
-        const json = await data.json()
-        return json
+        try {
+            const json = await data.json()
+            return json
+        } catch (error) {
+            return null
+        }
     }
     function setTeamData(data: any) {
         const team: TeamModel = {
