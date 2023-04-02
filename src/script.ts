@@ -6,6 +6,7 @@ import * as path from 'path';
 import GameModel from '../model/GameModel';
 
 const workbook = new Excel.Workbook()
+const worksheet = workbook.addWorksheet("Game Stats")
 
 for (let i = 0; i < 40; i++) {
     const gameid = 8750 + i
@@ -85,7 +86,6 @@ for (let i = 0; i < 40; i++) {
 
     //Write to excel
     async function writeData(data: any, gameId: number) {
-        const worksheet = workbook.addWorksheet("Game " + gameId)
         worksheet.columns = [
             { header: 'GameId', key: 'id', width: 10 },
             { header: 'Team', key: 'teamName', width: 20 },
@@ -127,6 +127,18 @@ for (let i = 0; i < 40; i++) {
                     MatchKD: player.MatchKD
                 })
             })
+            worksheet.addRow({
+                id: '',
+                teamName: '',
+                name: '',
+                alias: '',
+                kills: '',
+                deaths: '',
+                assists: '',
+                nonTradeKills: '',
+                hillTime: '',
+                MatchKD: ''
+             })
         })
         const exportPath = path.resolve(__dirname, 'gameStats.xlsx');
         await workbook.xlsx.writeFile(exportPath);
