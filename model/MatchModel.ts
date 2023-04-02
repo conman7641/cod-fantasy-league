@@ -1,6 +1,6 @@
 import Team from "./TeamModel";
 
-interface GameModel {
+interface MatchModel {
     id: number;
     hostTeam: Team;
     guestTeam: Team;
@@ -8,4 +8,4 @@ interface GameModel {
     loserId: number;
 }
 
-export default GameModel;
+export default MatchModel;

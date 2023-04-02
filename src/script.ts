@@ -1,9 +1,8 @@
 const Excel = require('exceljs')
 import TeamModel from '../model/TeamModel'
 import PlayerModel from '../model/PlayerModel'
-import GameData from '../model/GameModel'
 import * as path from 'path';
-import GameModel from '../model/GameModel';
+import MatchModel from '../model/MatchModel';
 
 const workbook = new Excel.Workbook()
 const worksheet = workbook.addWorksheet("Game Stats")
@@ -66,7 +65,7 @@ for (let i = 0; i < 40; i++) {
                 assists: data[i].stats.totalAssists,
                 nonTradeKills: data[i].stats.untradedKills,
                 hillTime: data[i].stats.hillTime,
-                MatchKD: Number(data[i].stats.killDeathRatio)
+                MatchKD: Number(data[i].stats.killDeathRatio),
             }
             Players.push(player)
         }
@@ -74,7 +73,7 @@ for (let i = 0; i < 40; i++) {
     }
 
     function setGameData(data: any, homeTeam: TeamModel, awayTeam: TeamModel) {
-        const game: GameData = {
+        const game: MatchModel = {
             id: data.match.id,
             hostTeam: homeTeam,
             guestTeam: awayTeam,
@@ -98,7 +97,7 @@ for (let i = 0; i < 40; i++) {
             { header: 'HillTime', key: 'hillTime', width: 10 },
             { header: 'MatchKD', key: 'MatchKD', width: 10 },
         ]
-        data.forEach((game: GameModel) => {
+        data.forEach((game: MatchModel) => {
             game.hostTeam.Players.forEach((player: PlayerModel) => {
                 worksheet.addRow({
                     id: game.id,
