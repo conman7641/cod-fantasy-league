@@ -140,7 +140,7 @@ for (let i = 0; i < 40; i++) {
                 MatchKD: ''
              })
         })
-        const exportPath = path.resolve(__dirname, 'gameStats.xlsx');
+        const exportPath = path.resolve(__dirname, '../data/gameStats.xlsx');
         await workbook.xlsx.writeFile(exportPath);
         
     }
