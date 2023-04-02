@@ -5,15 +5,18 @@ import GameData from '../model/GameModel'
 import * as path from 'path';
 import GameModel from '../model/GameModel';
 
-for (let i = 0; i < 10; i++) {
-    const url = `https://cdl-other-services.abe-arsfutura.com/production/v2/content-types/match-detail/bltd79e337aca601012?locale=en-us&options=%7B%22id%22%3A${i + 8760}%7D`
+const workbook = new Excel.Workbook()
+const worksheet = workbook.addWorksheet("Game Stats")
+
+for (let i = 0; i < 40; i++) {
+    const gameid = 8750 + i
+    const url = `https://cdl-other-services.abe-arsfutura.com/production/v2/content-types/match-detail/bltd79e337aca601012?locale=en-us&options=%7B%22id%22%3A${gameid}%7D`
 
     const data = getData(url).then(data => {
-        if (data.data.matchData.matchExtended.match.status !== 'completed') {
+        if (data === null || data.data.matchData.matchExtended.match.status !== 'COMPLETED') {
             return;
         }
         const homeTeam = setTeamData(data.data.matchData.matchExtended.homeTeamCard) //get home team
-        console.log(data.data.matchData.matchStats)
         const homePlayers = setPlayerData(data.data.matchData.matchStats.overall.hostTeam) //get home players
         const awayTeam = setTeamData(data.data.matchData.matchExtended.awayTeamCard) //get away team
         const awayPlayers = setPlayerData(data.data.matchData.matchStats.overall.guestTeam) //get away players
@@ -23,7 +26,7 @@ for (let i = 0; i < 10; i++) {
 
         const game = setGameData(data.data.matchData.matchExtended, homeTeam, awayTeam)
 
-        writeData([game])
+        writeData([game], 8750 + i)
     })
 }
 
@@ -33,8 +36,12 @@ for (let i = 0; i < 10; i++) {
                 'x-origin': 'callofdutyleague.com',
             }
         })
-        const json = await data.json()
-        return json
+        try {
+            const json = await data.json()
+            return json
+        } catch (error) {
+            return null
+        }
     }
     function setTeamData(data: any) {
         const team: TeamModel = {
@@ -78,10 +85,7 @@ for (let i = 0; i < 10; i++) {
     }
 
     //Write to excel
-    async function writeData(data: any) {
-
-        const workbook = new Excel.Workbook()
-        const worksheet = workbook.addWorksheet('My Sheet')
+    async function writeData(data: any, gameId: number) {
         worksheet.columns = [
             { header: 'GameId', key: 'id', width: 10 },
             { header: 'Team', key: 'teamName', width: 20 },
@@ -123,8 +127,20 @@ for (let i = 0; i < 10; i++) {
                     MatchKD: player.MatchKD
                 })
             })
+            worksheet.addRow({
+                id: '',
+                teamName: '',
+                name: '',
+                alias: '',
+                kills: '',
+                deaths: '',
+                assists: '',
+                nonTradeKills: '',
+                hillTime: '',
+                MatchKD: ''
+             })
         })
-        const exportPath = path.resolve(__dirname, 'countries.xlsx');
+        const exportPath = path.resolve(__dirname, '../data/gameStats.xlsx');
         await workbook.xlsx.writeFile(exportPath);
         
     }
