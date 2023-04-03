@@ -6,6 +6,7 @@ interface MatchModel {
     guestTeam: Team;
     winnerId: number;
     loserId: number;
+    matchDate: Date;
 }
 
 export default MatchModel;
