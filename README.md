@@ -1,2 +1,2 @@
 # cod-fantasy-league
-App used to pull Call of Duty League match stats and write them into an excel file to determine fantasy points per player
+Script used to pull Call of Duty League match stats and write them into an excel file to determine fantasy points per player
