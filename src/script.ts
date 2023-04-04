@@ -7,6 +7,8 @@ import MatchModel from '../model/MatchModel';
 const workbook = new Excel.Workbook()
 const worksheet = workbook.addWorksheet("Game Stats")
 const games: MatchModel[] = []
+let badGames: number[] = []
+let goodGames: number = 0
 
 async function getGames() {
     let data = null
@@ -17,7 +19,6 @@ async function getGames() {
         //create a promise for each game
         data = getData(url).then(data => {
             if (data === null || data.data.matchData.matchExtended.match.status !== 'COMPLETED') {
-                //console.log('Game not found')
                 return;
             }
             const homeTeam = setTeamData(data.data.matchData.matchExtended.homeTeamCard) //get home team
@@ -27,7 +28,13 @@ async function getGames() {
     
             homeTeam.Players = homePlayers
             awayTeam.Players = awayPlayers
-    
+
+            //check if game is valid
+            if (!checkGames(data.data.matchData.matchStats.matches.hostTeam)) {
+                badGames.push(gameid)
+            } else {
+                goodGames++
+            }
             const game = setGameData(data.data.matchData.matchExtended, homeTeam, awayTeam)
             games.push(game)
         })
@@ -36,6 +43,8 @@ async function getGames() {
     games.sort((a, b) => {
         return a.matchDate.getTime() - b.matchDate.getTime()
     })
+    console.log('Bad Games: \n' + badGames)
+    console.log('Good Games: ' + goodGames)
     writeData(games)
 }
 
@@ -63,21 +72,26 @@ function setTeamData(data: any) {
 }
 
 function setPlayerData(data: any) {
-    //Home Team
     const Players: PlayerModel[] = []
     for (let i = 0; i < data.length; i++) {
-        const player: PlayerModel = {
-            id: data[i].id,
-            name: data[i].firstName + ' ' + data[i].lastName,
-            alias: data[i].alias,
-            kills: data[i].stats.totalKills,
-            deaths: data[i].stats.totalDeaths,
-            assists: data[i].stats.totalAssists,
-            nonTradeKills: data[i].stats.untradedKills,
-            hillTime: data[i].stats.hillTime,
-            MatchKD: Number(data[i].stats.killDeathRatio),
+        try {
+            const player: PlayerModel = {
+                id: data[i].id,
+                name: data[i].firstName + ' ' + data[i].lastName,
+                alias: data[i].alias,
+                kills: data[i].stats.totalKills,
+                deaths: data[i].stats.totalDeaths,
+                assists: data[i].stats.totalAssists,
+                nonTradeKills: data[i].stats.untradedKills,
+                hillTime: data[i].stats.hillTime,
+                MatchKD: Number(data[i].stats.killDeathRatio),
+            }
+            Players.push(player)
+        } catch (error) {
+            //Player does not have stats
+            //Bad player entry on api
+            //reference see gameid 9006
         }
-        Players.push(player)
     }
     return Players
 }
@@ -170,6 +184,19 @@ async function writeData(data: any) {
     const exportPath = path.resolve(__dirname, '../data/gameStats.xlsx');
     await workbook.xlsx.writeFile(exportPath);
     
+}
+
+//check if the game data is complete
+function checkGames(data: any) {
+    for (let i = 0; i < data.length; i++) {
+        if (data[i][0].length === 0) {
+            return true;
+        }
+        if (data[i][0].stats.killDeathRatio === "NaN") {
+            return false;
+        }
+    }
+    return true;
 }
 
 getGames()
