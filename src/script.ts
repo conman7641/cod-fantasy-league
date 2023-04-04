@@ -10,8 +10,8 @@ const games: MatchModel[] = []
 
 async function getGames() {
     let data = null
-    for (let i = 0; i < 40; i++) {
-        const gameid = 8760 + i
+    for (let i = 0; i < 150; i++) {
+        const gameid = 8650 + i
         const url = `https://cdl-other-services.abe-arsfutura.com/production/v2/content-types/match-detail/bltd79e337aca601012?locale=en-us&options=%7B%22id%22%3A${gameid}%7D`
     
         //create a promise for each game
